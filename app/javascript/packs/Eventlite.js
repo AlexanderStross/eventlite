@@ -4,6 +4,7 @@ import axios from 'axios'
 
 import EventsList from './EventsList'
 import EventForm from './EventForm'
+import FormErrors from './FormErrors'
 
 class Eventlite extends React.Component {
   constructor(props) {
@@ -12,7 +13,8 @@ class Eventlite extends React.Component {
       events: this.props.events,
       title: '',
       start_datetime: '',
-      location: ''
+      location: '',
+      formErrors: {}
     }
   }
 
@@ -25,23 +27,29 @@ class Eventlite extends React.Component {
   }
 
   handleSubmit = e => {
-    e.preventDefault()
-    let newEvent = { title: this.state.title, start_datetime: this.state.start_datetime, location: this.state.location }
-    axios({
-      method: 'POST',
-      url: '/events',
-      data: { event: newEvent },
-      headers: {
-        'X-CSRF-Token': document.querySelector("meta[name=csrf-token]").content
-      }
-    })
-    .then(response => {
-      this.addNewEvent(response.data)
-    })
-    .catch(error => {
-      console.log(error.response.data)
-    })
-  }
+     e.preventDefault()
+     let newEvent = { title: this.state.title, start_datetime: this.state.start_datetime, location: this.state.location }
+     axios({
+       method: 'POST',
+       url: '/events',
+       data: { event: newEvent },
+       headers: {
+         'X-CSRF-Token': document.querySelector("meta[name=csrf-token]").content
+       }
+     })
+     .then(response => {
+       this.addNewEvent(response.data)
+             this.resetFormErrors()
+     })
+     .catch(error => {
+       console.log(error.response.data)
+       this.setState({formErrors: error.response.data})
+     })
+   }
+
+   resetFormErrors () {
+      this.setState({formErrors: {}})
+    }
 
   addNewEvent = (event) => {
     const events = [...this.state.events, event].sort(function(a, b){
@@ -53,6 +61,7 @@ class Eventlite extends React.Component {
   render() {
     return (
       <div>
+        <FormErrors formErrors = {this.state.formErrors} />
         <EventForm handleSubmit = {this.handleSubmit}
           handleInput = {this.handleInput}
           title = {this.state.title}
