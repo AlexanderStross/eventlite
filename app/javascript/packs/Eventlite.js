@@ -39,7 +39,7 @@ class Eventlite extends React.Component {
       this.addNewEvent(response.data)
     })
     .catch(error => {
-      console.log(error)
+      console.log(error.response.data)
     })
   }
 
